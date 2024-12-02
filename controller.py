@@ -34,7 +34,7 @@ class Controller:
             self.view.show_message("13. View Reservations")
             self.view.show_message("14. Add Reservation")
             self.view.show_message("15. Update Reservation")
-            self.view.show_message("16. Generate Reservations")  # Додано пункт для генерації резервацій
+            self.view.show_message("16. Generate Reservations")  
 
             self.view.show_message("")
 
@@ -110,14 +110,12 @@ class Controller:
 
     def get_data_in_range(self):
         try:
-            # Запит параметрів для отримання даних в діапазоні
             table_name = self.view.get_input("Enter the table name: ")
             id_field = self.view.get_input("Enter the ID field name: ")
             id_start = self.view.get_input("Enter the starting ID: ")
             id_end = self.view.get_input("Enter the ending ID: ")
             order_field = self.view.get_input("Enter the field to order by: ")
             
-            # Формування запиту для передачі в model
             request = f"{table_name} {id_field} {id_start} {id_end} {order_field}"
             
         except Exception as e:
@@ -127,13 +125,11 @@ class Controller:
 
     def get_data_by_field_like(self):
         try:
-            # Запит параметрів для пошуку за полем
             table_name = self.view.get_input("Enter the table name: ")
             req_field = self.view.get_input("Enter the field name to search in: ")
             search_req = self.view.get_input("Enter the search text: ")
             order_field = self.view.get_input("Enter the field to order by: ")
 
-            # Формування запиту для передачі в model
             request = f"{table_name} {req_field} {search_req} {order_field}"
 
         except Exception as e:
@@ -162,7 +158,6 @@ class Controller:
                 
                 result = self.model.get_data_by_field_like(f"{table_name} {req_field} {search_req} {order_field}")
 
-            # Виведення результату
             if table_name == "users":
                 self.view.display_users(result)
             elif table_name == "restaurants":
@@ -290,7 +285,6 @@ class Controller:
         phone = self.view.get_input("Enter contact's phone number: ")
         user_id = self.view.get_input("Enter user ID: ")
         
-        # Перевірка на наявність унікальності email та phone
         self.model.add_contact(user_id, email, phone)
    
     def update_contact(self):

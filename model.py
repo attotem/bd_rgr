@@ -27,8 +27,6 @@ class Model:
             port = 5432
         )
 
-    # Перегляд
-
     @timeit
     def get_data_in_range(self, request):
         c = self.conn.cursor()
@@ -77,7 +75,6 @@ class Model:
 
         return result
 
-    # ВИДАЛЕННЯ
 
     @timeit
     def delete_data(self, table_name, field, value):
@@ -116,18 +113,15 @@ class Model:
             print(f"Error executing query: {str(e)}")
             self.conn.rollback()
 
-    # Додавання нового користувача
     @timeit
     def add_user(self, name):
         """Додавання нового користувача до таблиці users."""
         try:
             c = self.conn.cursor()
 
-            # Отримання останнього значення user_id
             c.execute('SELECT MAX(user_id) FROM "users"')
-            latest_id = c.fetchone()[0] or 0  # Якщо таблиця порожня, latest_id = 0
+            latest_id = c.fetchone()[0] or 0  
 
-            # Додавання нового користувача
             new_id = latest_id + 1
             query = f'INSERT INTO "users" (user_id, name) VALUES (%s, %s)'
             c.execute(query, (new_id, name))
@@ -143,7 +137,6 @@ class Model:
             c.close()
 
 
-    # Оновлення даних користувача
     @timeit
     def update_user(self, user_id, new_name):
         try:
@@ -157,7 +150,6 @@ class Model:
         finally:
             c.close()
 
-    # Видалення користувача
     @timeit
     def delete_user(self, user_id):
         try:
@@ -171,17 +163,14 @@ class Model:
         finally:
             c.close()
 
-    # Генерація користувачів
     @timeit
     def generate_users(self, num_users):
         """Генерація випадкових користувачів для таблиці users."""
         try:
-            # Отримуємо максимальний user_id з таблиці, щоб уникнути дублювання
             query = 'SELECT MAX(user_id) FROM "users"'
             max_user_id = self.fetch_query(query)
             max_user_id = max_user_id[0][0] if max_user_id[0][0] else 0
 
-            # Генерація користувачів
             query = f"""
                 WITH generated_users AS (
                     SELECT 
@@ -203,12 +192,10 @@ class Model:
     def generate_restaurants(self, num_restaurants):
         """Генерація нових ресторанів"""
         try:
-            # Отримуємо максимальний restaurant_id з таблиці для уникнення дублювання
             query = "SELECT MAX(restaurant_id) FROM restaurants"
             max_restaurant_id = self.fetch_query(query)
             max_restaurant_id = max_restaurant_id[0][0] if max_restaurant_id[0][0] else 0
 
-            # Генерація ресторанів
             query = f"""
                 WITH generated_restaurants AS (
                     SELECT 
@@ -246,15 +233,12 @@ class Model:
     def add_restaurant(self, name, table_quantity):
         """Додавання нового ресторану з перевіркою максимального restaurant_id"""
         try:
-            # Заміняємо одиночні апострофи на два апострофи
             name = name.replace("'", "''")
 
-            # Отримуємо максимальний restaurant_id з таблиці для уникнення дублювання
             query = "SELECT MAX(restaurant_id) FROM restaurants"
             max_restaurant_id = self.fetch_query(query)
             max_restaurant_id = max_restaurant_id[0][0] if max_restaurant_id[0][0] else 0
 
-            # Вставляємо новий ресторан з наступним restaurant_id
             query = f"""
                 INSERT INTO restaurants (restaurant_id, name, table_quantity)
                 VALUES ({max_restaurant_id + 1}, '{name}', {table_quantity})
@@ -284,12 +268,10 @@ class Model:
     def add_restaurant_table(self, capacity, restaurant_id):
         """Додавання нової таблиці до ресторану з унікальним ID"""
         try:
-            # Отримуємо максимальний table_id для уникнення дублювання
             query = "SELECT MAX(table_id) FROM restaurant_tables"
             max_table_id = self.fetch_query(query)
             max_table_id = max_table_id[0][0] if max_table_id[0][0] else 0
             
-            # Додавання нової таблиці ресторану
             query = f"""
                 INSERT INTO restaurant_tables (table_id, capacity, restaurant_id)
                 VALUES ({max_table_id + 1}, {capacity}, {restaurant_id})
@@ -318,15 +300,13 @@ class Model:
     def generate_restaurant_tables(self, num_tables):
         """Генерація нових столів для ресторанів з перевіркою максимальних значень"""
         try:
-            # Отримуємо максимальний table_id з таблиці для уникнення дублювання
             query = "SELECT MAX(table_id) FROM restaurant_tables"
             max_table_id = self.fetch_query(query)
-            max_table_id = max_table_id[0][0] if max_table_id[0][0] else 0  # Якщо таблиця порожня, починаємо з 0
+            max_table_id = max_table_id[0][0] if max_table_id[0][0] else 0  
             
-            # Отримуємо максимальний restaurant_id з таблиці restaurants
             query = "SELECT MAX(restaurant_id) FROM restaurants"
             max_restaurant_id = self.fetch_query(query)
-            max_restaurant_id = max_restaurant_id[0][0] if max_restaurant_id[0][0] else 0  # Якщо таблиця порожня, починаємо з 0
+            max_restaurant_id = max_restaurant_id[0][0] if max_restaurant_id[0][0] else 0  
             
             # Генерація столів
             query = f"""
@@ -364,7 +344,6 @@ class Model:
     def add_reservation(self, user_id, table_id, reservation_date, duration):
         """Додавання нового бронювання"""
         try:
-            # Отримуємо максимальний id для уникнення дублювання
             query = "SELECT MAX(reservation_id) FROM reservations"
             max_table_id = self.fetch_query(query)
             max_table_id = max_table_id[0][0] if max_table_id[0][0] else 0
@@ -396,22 +375,18 @@ class Model:
     def generate_reservations(self, num_reservations):
         """Генерація випадкових бронювань без циклів, через SQL"""
         try:
-            # Отримуємо максимальний reservation_id для уникнення дублювань
             query = "SELECT COALESCE(MAX(reservation_id), 0) FROM reservations"
             max_reservation_id = self.fetch_query(query)
             max_reservation_id = max_reservation_id[0][0]
 
-            # Отримуємо максимальний table_id для можливих таблиць
             query = "SELECT MAX(table_id) FROM restaurant_tables"
             max_table_id = self.fetch_query(query)
             max_table_id = max_table_id[0][0] if max_table_id[0][0] else 0
 
-            # Отримуємо максимальний user_id для перевірки доступних користувачів
             query = "SELECT MAX(user_id) FROM users"
             max_user_id = self.fetch_query(query)
             max_user_id = max_user_id[0][0] if max_user_id[0][0] else 0
 
-            # Генеруємо випадкові бронювання через SQL
             query = f"""
                 WITH random_reservations AS (
                     SELECT
@@ -435,12 +410,10 @@ class Model:
     def add_contact(self, user_id, email, phone):
         """Додавання нового контакту з унікальним contact_id"""
         try:
-            # Отримуємо максимальний contact_id
             query = "SELECT MAX(contact_id) FROM contacts"
             max_contact_id = self.fetch_query(query)
-            max_contact_id = max_contact_id[0][0] if max_contact_id[0][0] else 0  # Якщо таблиця порожня, починаємо з 0
+            max_contact_id = max_contact_id[0][0] if max_contact_id[0][0] else 0  
 
-            # Вставляємо новий контакт з contact_id на один більше від максимального
             query = f"""
                 INSERT INTO contacts (contact_id, user_id, email, phone)
                 VALUES ({max_contact_id + 1}, {user_id}, '{email}', '{phone}')
@@ -467,7 +440,6 @@ class Model:
     def generate_contacts(self, num_contacts):
         """Генерація випадкових контактів"""
         try:
-            # Отримуємо максимальні значення user_id для створення випадкових значень
             max_user_id = self.fetch_query("SELECT MAX(user_id) FROM users")[0][0] or 0
             
             query = f"""
